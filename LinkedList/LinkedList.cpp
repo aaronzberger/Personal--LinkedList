@@ -6,8 +6,10 @@ LinkedList::LinkedList()
     : head{nullptr}, tail{nullptr} {}
 
 LinkedList::LinkedList(Node &n) {
-    tail = head = &n;
-    head->next = nullptr;
+    Node *newNode = new Node(n);
+    newNode->next = nullptr;
+    tail = newNode;
+    head = newNode;
 }
 
 LinkedList::~LinkedList() {
@@ -16,78 +18,88 @@ LinkedList::~LinkedList() {
         removeHead();
     }
     removeHead();
-    //might not work with 0 elements
 }
 
 void LinkedList::addToStart(Node &n) {
-    Node *temp = &n;
-    temp->next = head;
+    Node *newNode = new Node(n);
+    newNode->next = head;
     if(head == nullptr)
-        tail = temp;
-    head = temp;
+        tail = newNode;
+    head = newNode;
 }
 
 void LinkedList::addToEnd(Node &n) {
-    Node *temp = &n;
-    temp->next = nullptr;
+    Node *newNode = new Node(n);
+    newNode->next = nullptr;
     if(head == nullptr)
-        head = temp;
+        head = newNode;
     else
-        tail->next = temp;
-    tail = temp;
+        tail->next = newNode;
+    tail = newNode;
 }
 
 void LinkedList::removeHead() {
     if(head == nullptr) { return; }
-    Node *temp = head->next;
-    head = temp;
+    Node *newHead = head->next;
+    delete head;
+    head = newHead;
 }
 
 void LinkedList::removeTail() {
-    Node *prev = head;
-    while(prev->next != tail)
-        prev = prev->next;
-    prev->next = nullptr;
-    tail = prev;
+    Node *nextToLast = head;
+    while(nextToLast->next != tail)
+        nextToLast = nextToLast->next;
+    nextToLast->next = nullptr;
+    delete tail;
+    tail = nextToLast;
 }
 
 void LinkedList::removeAtIndex(int index) {
-    //no error checking that index is in range
-    Node *prev = head;
-    for(int i{0}; i != (index-1); i++)
-        prev = prev->next;
-    Node *temp = prev->next;
-    prev->next = temp->next;
+    Node *beforeIndex = head;
+    for(int i{0}; i != (index - 1); i++) {
+        if(beforeIndex->next == nullptr)
+            throw std::runtime_error("The traverser exited the list in the removeAtIndex method and did not find an element with that index");
+        beforeIndex = beforeIndex->next;
+    }
+    Node *atIndex = beforeIndex->next;
+    beforeIndex->next = atIndex->next;
+    delete atIndex;
 }
 
 void LinkedList::removeName(std::string name) {
-    Node *prev = head;
-    while(prev->next->s != name)
-        prev = prev->next;
-    Node *temp =  prev->next;
-    prev->next = temp->next;
-    
+    Node *beforeName = head;
+    while(beforeName->next->s != name) {
+        if(beforeName->next == nullptr)
+            throw std::runtime_error("Reached the end of the list and didn't find the name, in removeName method");
+        beforeName = beforeName->next;
+    }
+    Node *atName =  beforeName->next;
+    beforeName->next = atName->next;
+    delete atName;
 }
 
-void LinkedList::insertAtPosition(int index, Node &n) {
-    Node *prev = head;
-    for(int i{0}; i != (index-1); i++)
-        prev = prev->next;
-    Node *temp = &n;
-    temp->next = prev->next;
-    prev->next = temp;
+void LinkedList::insertAtIndex(int index, Node &n) {
+    Node *newNode = new Node(n);
+    Node *beforeIndex = head;
+    for(int i{0}; i != (index - 1); i++) {
+        if(beforeIndex->next == nullptr)
+            throw std::runtime_error("Index out of range in insertAtIndex method");
+        beforeIndex = beforeIndex->next;
+    }
+    newNode->next = beforeIndex->next;
+    beforeIndex->next = newNode;
 }
 
 void LinkedList::printList() {
-    Node *temp = head;
-    if(temp->next == nullptr) {
-        std::cout << temp->s << " is " << temp->a << std::endl;
+    Node *traverser = head;
+    if(traverser->next == nullptr) {
+        std::cout << traverser->s << " is " << traverser->a << std::endl;
         return;
     }
-    while(temp->next != nullptr) {
-        std::cout << temp->s << " is " << temp->a << std::endl;
-        temp = temp->next;
+    while(traverser->next != nullptr) {
+        std::cout << traverser->s << " is " << traverser->a << std::endl;
+        traverser = traverser->next;
     }
-    std::cout << temp->s << " is " << temp->a << std::endl;
+    std::cout << traverser->s << " is " << traverser->a << std::endl;
     std::cout << std::endl;
 }
